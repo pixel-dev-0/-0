@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1b3a63">
+<title>لوحة الإدارة — AL-IRAQI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1b3a63;--navy-deep:#142c4c;--navy-soft:#eaf0f7;
+  --emerald:#1f9d76;--emerald-dk:#17825f;--emerald-bg:#e8f6f1;
+  --danger:#c2564e;--danger-bg:#fbeeed;--warn:#b7791f;--warn-bg:#fff4dc;
+  --bg:#f4f6f9;--card:#fff;--line:#e3e7ec;--text:#22303f;--muted:#77838f;--surface:#f1f3f6;
+  --shadow:0 6px 18px rgba(27,58,99,.07);--shadow-lg:0 18px 45px rgba(27,58,99,.18);--r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;line-height:1.6}
+button,input,select,textarea{font-family:inherit;font-size:.9rem;color:inherit}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--emerald);outline-offset:2px}
+
+/* ---------- الدخول ---------- */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%)}
+.login-card{width:min(400px,100%);background:var(--card);border-radius:22px;padding:30px 24px 24px;box-shadow:var(--shadow-lg);text-align:center}
+.brand-mark{width:62px;height:62px;border-radius:16px;margin:0 auto 10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font:800 1.5rem 'Montserrat',sans-serif}
+.login-card h1{margin:0 0 4px;font-size:1.2rem;color:var(--navy)}
+.login-card p{margin:0 0 16px;color:var(--muted);font-size:.85rem}
+.login-card input,.login-card select{width:100%;margin-bottom:10px;text-align:center}
+
+/* ---------- عناصر عامة ---------- */
+input,select,textarea{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-width:0}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px var(--navy-soft)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:none;border-radius:999px;background:var(--navy);color:#fff;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;white-space:nowrap}
+.btn:hover{background:var(--navy-deep)}.btn:active{transform:scale(.97)}
+.btn.green{background:var(--emerald)}.btn.green:hover{background:var(--emerald-dk)}
+.btn.red{background:var(--danger)}.btn.red:hover{background:#a8433c}
+.btn.ghost{background:var(--surface);color:var(--navy);border:1px solid var(--line)}.btn.ghost:hover{background:var(--navy-soft)}
+.btn.sm{padding:6px 13px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:wait}
+.pill{display:inline-block;padding:2px 11px;border-radius:999px;font-size:.74rem;font-weight:800;white-space:nowrap}
+.pill.ok{background:var(--emerald-bg);color:var(--emerald-dk)}.pill.no{background:var(--danger-bg);color:var(--danger)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.info{background:var(--navy-soft);color:var(--navy)}
+.hint{color:var(--muted);font-size:.8rem;margin:6px 0 0}
+.muted{color:var(--muted)}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+/* ---------- الهيكل ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:var(--navy);color:#fff;box-shadow:var(--shadow)}
+.topbar-in{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.topbar .brand-mark{width:38px;height:38px;border-radius:10px;margin:0;font-size:.95rem;background:var(--emerald)}
+.topbar h1{margin:0;font-size:1rem;font-weight:800;flex:1}
+.topbar h1 small{display:block;font-size:.7rem;font-weight:600;opacity:.75}
+.who{font-size:.82rem;opacity:.9}
+nav.tabs{max-width:1280px;margin:0 auto;padding:0 12px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:11px 16px;border:none;background:transparent;color:#cfdcec;font-weight:700;cursor:pointer;border-bottom:3px solid transparent}
+.tab:hover{color:#fff}.tab.on{color:#fff;border-bottom-color:var(--emerald)}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 14px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 12px;font-size:1rem;color:var(--navy);display:flex;align-items:center;gap:8px}
+.flash{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:90;padding:11px 20px;border-radius:999px;font-weight:800;font-size:.86rem;box-shadow:var(--shadow-lg);max-width:92vw;text-align:center}
+.flash.ok{background:var(--emerald);color:#fff}.flash.err{background:var(--danger);color:#fff}
+
+/* ---------- لوحة المتابعة ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:1.55rem;color:var(--navy);font-weight:800;line-height:1.2}
+.stat span{font-size:.8rem;color:var(--muted);font-weight:700}
+.stat.accent{background:linear-gradient(135deg,var(--navy),var(--navy-deep));border:none}.stat.accent b,.stat.accent span{color:#fff}
+
+/* ---------- جداول ---------- */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input,.toolbar select{flex:1 1 150px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{background:var(--surface);padding:9px 10px;text-align:right;white-space:nowrap;font-weight:800;color:var(--navy);position:sticky;top:0}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:hover td{background:#fafbfd}
+td .actions{display:flex;gap:6px;flex-wrap:wrap}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.low td{background:var(--warn-bg)}.out td{background:var(--danger-bg)}
+td input[type=number]{width:86px}
+
+/* ---------- نافذة الفاتورة ---------- */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(20,44,76,.6);backdrop-filter:blur(2px);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:18px 10px}
+.sheet{background:var(--card);width:min(920px,100%);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;margin:auto}
+.sheet-head{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--navy);color:#fff}
+.sheet-head h3{margin:0;flex:1;font-size:1rem;font-family:'Montserrat','Cairo',sans-serif;direction:ltr;text-align:right}
+.sheet-head button{width:36px;height:36px;border:none;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:1rem}
+.sheet-body{padding:16px 18px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+.kv div{background:var(--surface);border-radius:10px;padding:8px 12px}
+.kv small{display:block;color:var(--muted);font-size:.72rem;font-weight:700}
+.kv b{font-size:.92rem}
+.total-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:var(--navy-soft);margin:12px 0;font-weight:800;color:var(--navy)}
+.total-bar big{font-size:1.2rem}
+.add-line{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.add-line input{flex:1 1 240px}
+.sheet-foot{display:flex;gap:8px;flex-wrap:wrap;padding:14px 18px;border-top:1px solid var(--line);background:var(--surface)}
+.sheet-foot .grow{flex:1}
+textarea{width:100%;min-height:60px;resize:vertical}
+.badge-edit{font-size:.78rem;color:var(--warn);font-weight:700;margin-top:6px}
+
+/* ---------- موبايل ---------- */
+@media (max-width:640px){
+  .topbar-in{padding:8px 12px}.who{display:none}
+  .wrap{padding:12px 10px 60px}
+  .card{padding:12px}
+  .overlay{padding:0}.sheet{border-radius:0;min-height:100vh}
+  .tab{padding:10px 13px;font-size:.86rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== دخول الإدارة ===== -->
+<div class="login-wrap" id="loginBox">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="brand-mark">AI</div>
+    <h1>لوحة الإدارة</h1>
+    <p>AL-IRAQI HOME APPLIANCES</p>
+    <select id="adminUser" aria-label="المدير">
+      <option value="admin">admin — المدير الأول</option>
+      <option value="admin2">admin2 — المدير الثاني</option>
+      <option value="admin3">admin3 — المدير الثالث</option>
+    </select>
+    <input type="password" id="adminPass" placeholder="الباسورد" autocomplete="current-password" required>
+    <div class="pill no" id="loginErr" hidden style="display:block;margin-bottom:10px;padding:8px"></div>
+    <button class="btn" id="loginBtn" type="submit" style="width:100%">دخول</button>
+  </form>
+</div>
+
+<!-- ===== اللوحة ===== -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="topbar-in">
+      <div class="brand-mark">AI</div>
+      <h1>لوحة الإدارة<small>AL-IRAQI HOME APPLIANCES</small></h1>
+      <span class="who" id="whoName"></span>
+      <button class="btn ghost sm" id="logoutBtn" type="button">خروج</button>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="dash" type="button">📊 المتابعة</button>
+      <button class="tab" data-tab="orders" type="button">🧾 الفواتير</button>
+      <button class="tab" data-tab="customers" type="button">👥 العملاء</button>
+      <button class="tab" data-tab="stock" type="button">📦 المخزون</button>
+      <button class="tab" data-tab="test" type="button">🧪 وضع التجربة</button>
+    </nav>
+  </header>
+  <div class="flash" id="flash" hidden></div>
+
+  <main class="wrap">
+    <!-- المتابعة -->
+    <section id="tab-dash">
+      <div class="stats" id="stats"></div>
+      <div class="card"><h2>آخر الفواتير</h2><div class="scroll"><table id="dashTable"></table></div></div>
+    </section>
+
+    <!-- الفواتير -->
+    <section id="tab-orders" hidden>
+      <div class="card">
+        <div class="toolbar">
+          <input id="oQ" placeholder="🔎 رقم الفاتورة / العميل / الهاتف…">
+          <select id="oStatus"><option value="">كل الحالات</option><option value="ACTIVE">مُرسل</option><option value="EDITED">معدّل</option><option value="CANCELLED">ملغي</option></select>
+          <select id="oMode"><option value="REAL">الحقيقية</option><option value="TEST">التجريبية</option><option value="">الكل</option></select>
+          <select id="oSite"><option value="">الجملة + القطاعي</option><option value="wholesale">الجملة</option><option value="retail">القطاعي</option></select>
+          <button class="btn ghost sm" id="oReload" type="button">↻ تحديث</button>
+        </div>
+        <div class="scroll"><table id="ordTable"></table></div>
+      </div>
+    </section>
+
+    <!-- العملاء -->
+    <section id="tab-customers" hidden>
+      <div class="card">
+        <h2>➕ إضافة / تعديل عميل</h2>
+        <div class="toolbar">
+          <input id="cUser" placeholder="اسم المستخدم (مميز لكل عميل)" autocomplete="off">
+          <input id="cPass" placeholder="الباسورد (فاضي عند التعديل = بدون تغيير)" autocomplete="off">
+          <button class="btn ghost sm" id="genPass" type="button">🎲 توليد باسورد</button>
+        </div>
+        <div class="toolbar">
+          <select id="cSite"><option value="wholesale">موقع الجملة</option><option value="retail">موقع القطاعي</option></select>
+          <input id="cNote" placeholder="ملاحظة (اسم المحل / الرقم…)">
+          <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="cActive" checked> مفعّل</label>
+          <button class="btn green" id="saveCust" type="button">حفظ</button>
+        </div>
+        <p class="hint">الباسورد بيتحفظ مشفّر ومش هتقدر تشوفه بعد كده — انسخه وابعته للعميل وقت الإنشاء. لو العميل محتاج الموقعين اعمله حسابين.</p>
+      </div>
+      <div class="card"><div class="toolbar"><input id="cQ" placeholder="🔎 ابحث عن عميل…"></div><div class="scroll"><table id="custTable"></table></div></div>
+    </section>
+
+    <!-- المخزون -->
+    <section id="tab-stock" hidden>
+      <div class="card">
+        <div class="toolbar"><input id="stockQ" placeholder="🔎 ابحث بالكود أو الاسم…"><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="stockLow"> الناقص فقط</label></div>
+        <p class="hint">المخزون بالكراتين (ممكن كسور). أقل من 1 = «غير متوفر» تلقائيًا. الخانة الفاضية = غير متتبّع. عمود «تجريبي» لوضع التجربة فقط.</p>
+      </div>
+      <div class="card"><div class="scroll"><table id="stockTable"></table></div></div>
+    </section>
+
+    <!-- التجربة -->
+    <section id="tab-test" hidden>
+      <div class="card">
+        <h2>🧪 وضع التجربة</h2>
+        <p>سجّل دخول في موقع الجملة أو القطاعي بحساب الإدارة (<b>admin</b> أو <b>admin2</b> أو <b>admin3</b>): هتشوف الموقع زي العميل بالظبط وبشريط أحمر، وكل الطلبات بتتخصم من مخزون تجريبي منفصل (عمود <code>stock_test</code>) ومش بتلمس البضاعة الحقيقية. الطلبات التجريبية بتظهر في الفواتير بتصفية «التجريبية».</p>
+        <button class="btn red" id="resetTest" type="button">إعادة المخزون التجريبي من نسخة المخزون الحقيقي</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const API_URL = ""; // ⚠️ حط هنا نفس رابط الـ Web App اللي في script.js
+const TOKEN_KEY = "aliraqi_admin_session";
+const $ = (id) => document.getElementById(id);
+
+/* عنصر DOM آمن — textContent فقط (مفيش innerHTML لأي بيانات جاية من الشيت أو العملاء) */
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (k === "class") e.className = v;
+    else if (k === "on") Object.entries(v).forEach(([ev, fn]) => e.addEventListener(ev, fn));
+    else if (v === true) e.setAttribute(k, "");
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  });
+  kids.flat().forEach((c) => c != null && c !== false && e.append(c.nodeType ? c : document.createTextNode(String(c))));
+  return e;
+}
+let flashT;
+function flash(msg, ok) {
+  const f = $("flash");
+  f.hidden = false; f.className = "flash " + (ok ? "ok" : "err"); f.textContent = msg;
+  clearTimeout(flashT); flashT = setTimeout(() => (f.hidden = true), 4500);
+}
+const money = (n) => (Math.round((Number(n) || 0) * 100) / 100).toLocaleString("en-US") + " ج.م";
+const pad = (n) => String(n).padStart(2, "0");
+const fmt = (d) => { const x = new Date(d); return isNaN(x) ? "" : `${x.getFullYear()}/${pad(x.getMonth() + 1)}/${pad(x.getDate())} ${pad(x.getHours())}:${pad(x.getMinutes())}`; };
+const siteLabel = (s) => (s === "retail" ? "قطاعي" : "جملة");
+const STATUS = { ACTIVE: ["مُرسل", "ok"], EDITED: ["معدّل", "info"], CANCELLED: ["ملغي", "no"] };
+const statusPill = (s) => { const [t, c] = STATUS[s] || [s, "warn"]; return h("span", { class: "pill " + c }, t); };
+const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+async function api(action, payload) {
+  if (!API_URL) { flash("ضيف API_URL في أول السكريبت", false); return { ok: false }; }
+  try {
+    const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(Object.assign({ action, token: sessionStorage.getItem(TOKEN_KEY) || "" }, payload || {})) });
+    const j = await res.json();
+    if (!j.ok && (j.code === "TOKEN" || j.code === "FORBIDDEN")) { sessionStorage.removeItem(TOKEN_KEY); show(false); flash("انتهت الجلسة — سجّل دخولك تاني", false); }
+    return j;
+  } catch (e) { flash("مفيش اتصال بالسيرفر", false); return { ok: false }; }
+}
+
+/* ---------------- الدخول ---------------- */
+function show(on) { $("loginBox").hidden = on; $("app").hidden = !on; if (on) { $("whoName").textContent = "👤 " + (sessionStorage.getItem("aliraqi_admin_name") || "admin"); switchTab("dash"); } }
+$("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const b = $("loginBtn"); b.disabled = true;
+  const user = $("adminUser").value;
+  const r = await api("login", { username: user, password: $("adminPass").value, deviceId: "admin-panel-no-device-lock" });
+  b.disabled = false;
+  const err = $("loginErr");
+  if (!r.ok) { err.hidden = false; err.textContent = r.code === "LOCKED" ? "محاولات كتير — جرّب بعد 15 دقيقة" : "الباسورد غلط"; return; }
+  err.hidden = true; $("adminPass").value = "";
+  sessionStorage.setItem(TOKEN_KEY, r.token); sessionStorage.setItem("aliraqi_admin_name", r.name);
+  show(true);
+});
+$("logoutBtn").addEventListener("click", () => { sessionStorage.removeItem(TOKEN_KEY); show(false); });
+
+/* ---------------- التبويبات ---------------- */
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((x) => x.classList.toggle("on", x.dataset.tab === name));
+  ["dash", "orders", "customers", "stock", "test"].forEach((n) => ($("tab-" + n).hidden = n !== name));
+  if (name === "dash") loadDash();
+  if (name === "orders") loadOrders();
+  if (name === "customers") loadCustomers();
+  if (name === "stock") loadStock();
+}
+$("tabs").addEventListener("click", (e) => { const t = e.target.closest(".tab"); if (t) switchTab(t.dataset.tab); });
+
+/* ---------------- المتابعة ---------------- */
+let ORDERS = [];
+async function fetchOrders(user) {
+  const r = await api("adm_orders", { limit: 800, user: user || "" });
+  if (r.ok) ORDERS = r.orders;
+  return r.ok;
+}
+async function loadDash() {
+  const [okO, c, s] = await Promise.all([fetchOrders(), api("adm_customers"), api("adm_stock")]);
+  if (!okO) return;
+  const today = new Date();
+  const real = ORDERS.filter((o) => o.mode === "REAL" && o.status !== "CANCELLED");
+  const td = real.filter((o) => sameDay(new Date(o.time), today));
+  const sum = (a) => a.reduce((t, o) => t + Number(o.total || 0), 0);
+  const low = s.ok ? s.items.filter((i) => i.real !== "" && Number(i.real) < 3) : [];
+  $("stats").replaceChildren(
+    h("div", { class: "stat accent" }, h("b", {}, money(sum(td))), h("span", {}, `مبيعات اليوم (${td.length} فاتورة)`)),
+    h("div", { class: "stat" }, h("b", {}, real.length), h("span", {}, "فواتير نشطة (آخر 800)")),
+    h("div", { class: "stat" }, h("b", {}, c.ok ? c.customers.filter((x) => x.active).length : "—"), h("span", {}, "عملاء مفعّلين")),
+    h("div", { class: "stat" }, h("b", {}, low.length), h("span", {}, "أصناف قربت تخلص (أقل من 3 كراتين)")),
+    h("div", { class: "stat" }, h("b", {}, ORDERS.filter((o) => o.status === "EDITED" && o.mode === "REAL").length), h("span", {}, "فواتير اتعدّلت")));
+  drawOrdersTable($("dashTable"), ORDERS.filter((o) => o.mode === "REAL").slice(0, 8));
+}
+
+/* ---------------- الفواتير ---------------- */
+function drawOrdersTable(t, list) {
+  if (!list.length) { t.replaceChildren(h("tr", {}, h("td", { class: "empty" }, "لا توجد فواتير"))); return; }
+  t.replaceChildren(
+    h("tr", {}, ...["الرقم", "الوقت", "العميل", "الموقع", "الإجمالي", "الحالة", ""].map((x) => h("th", {}, x))),
+    ...list.map((o) => h("tr", {},
+      h("td", {}, h("span", { class: "ltr", style: "font-weight:700" }, o.number), o.mode === "TEST" ? [" ", h("span", { class: "pill warn" }, "تجريبي")] : ""),
+      h("td", {}, h("span", { class: "ltr" }, fmt(o.time))),
+      h("td", {}, o.name || o.user, h("div", { class: "muted", style: "font-size:.75rem" }, o.user)),
+      h("td", {}, siteLabel(o.site)),
+      h("td", {}, money(o.total), o.originalTotal ? h("div", { class: "muted", style: "font-size:.72rem;text-decoration:line-through" }, money(o.originalTotal)) : ""),
+      h("td", {}, statusPill(o.status)),
+      h("td", {}, h("button", { class: "btn sm", type: "button", on: { click: () => openOrder(o) } }, "فتح")))));
+}
+async function loadOrders(user) {
+  if (!(await fetchOrders(user))) return;
+  drawOrders();
+}
+function drawOrders() {
+  const q = $("oQ").value.trim().toLowerCase(), st = $("oStatus").value, md = $("oMode").value, si = $("oSite").value;
+  drawOrdersTable($("ordTable"), ORDERS.filter((o) =>
+    (!st || o.status === st) && (!md || o.mode === md) && (!si || o.site === si) &&
+    (!q || `${o.number} ${o.user} ${o.name} ${o.phone}`.toLowerCase().includes(q))));
+}
+["oQ", "oStatus", "oMode", "oSite"].forEach((id) => $(id).addEventListener("input", drawOrders));
+$("oReload").addEventListener("click", () => loadOrders());
+
+/* ---- نافذة الفاتورة: مراجعة + تعديل الأصناف والكميات + إلغاء ---- */
+let STOCK_ITEMS = [];
+async function ensureStockItems() { if (!STOCK_ITEMS.length) { const r = await api("adm_stock"); if (r.ok) STOCK_ITEMS = r.items; } }
+
+async function openOrder(o) {
+  await ensureStockItems();
+  let lines = [];
+  try { lines = JSON.parse(o.lines); } catch (e) {}
+  const retail = o.site === "retail";
+  const locked = o.status === "CANCELLED";
+  const draft = lines.map((l) => ({ row: l.row, id: l.id, name: l.name, cartons: l.cartons || 0, pieces: l.pieces || 0, cp: l.cp, pp: l.pp, isNew: false }));
+
+  const body = h("div", { class: "sheet-body" });
+  const totalBar = h("div", { class: "total-bar" });
+  const tbl = h("table");
+  const note = h("textarea", { placeholder: "ملاحظة التعديل (بتظهر للعميل في سجله) — اختياري", disabled: locked });
+  const addInput = h("input", { list: "prodList", placeholder: "➕ ضيف صنف: اكتب الكود أو الاسم", disabled: locked });
+  const dl = h("datalist", { id: "prodList" }, STOCK_ITEMS.map((i) => h("option", { value: `${i.id} — ${i.name}` })));
+
+  const lineTotal = (l) => Math.round(((l.cartons || 0) * (l.cp || 0) + (l.pieces || 0) * (l.pp || 0)) * 100) / 100;
+  function draw() {
+    let sum = 0, unknown = false;
+    tbl.replaceChildren(
+      h("tr", {}, ...["الصنف", retail ? null : "كراتين", "قطع", "سعر الكرتونة", "سعر القطعة", "الإجمالي", ""].filter((x) => x !== null).map((x) => h("th", {}, x))),
+      ...draft.map((l, i) => {
+        const missing = l.isNew; if (missing) unknown = true; else sum += lineTotal(l);
+        const num = (key) => h("input", { type: "number", min: "0", step: "1", value: l[key], disabled: locked, on: { input: (e) => { l[key] = Math.max(0, Math.trunc(Number(e.target.value) || 0)); recalc(); } } });
+        return h("tr", { class: (l.cartons + l.pieces === 0) ? "out" : "" },
+          h("td", {}, h("b", {}, l.name), h("div", { class: "muted ltr", style: "font-size:.74rem" }, l.id), l.isNew ? h("div", { class: "badge-edit" }, "صنف جديد — يتسعّر بالسعر الحالي عند الحفظ") : ""),
+          retail ? null : h("td", {}, num("cartons")),
+          h("td", {}, num("pieces")),
+          h("td", {}, l.cp != null ? money(l.cp) : "—"), h("td", {}, l.pp != null ? money(l.pp) : "—"),
+          h("td", {}, l.isNew ? "—" : money(lineTotal(l))),
+          h("td", {}, locked ? "" : h("button", { class: "btn red sm", type: "button", title: "حذف السطر", on: { click: () => { draft.splice(i, 1); draw(); } } }, "✕")));
+      }).map((tr) => tr));
+    // شيل خلايا null (retail)
+    tbl.querySelectorAll("tr").forEach((tr) => [...tr.childNodes].forEach((n) => { if (n.nodeType !== 1) n.remove(); }));
+    totalBar.replaceChildren(h("span", {}, "الإجمالي بعد التعديل"), h("big", {}, money(sum) + (unknown ? " + أصناف جديدة" : "")));
+  }
+  const recalc = () => { /* إعادة حساب بدون إعادة رسم الحقول (عشان الفوكس) */
+    let sum = 0, unknown = false;
+    draft.forEach((l) => (l.isNew ? (unknown = true) : (sum += lineTotal(l))));
+    totalBar.replaceChildren(h("span", {}, "الإجمالي بعد التعديل"), h("big", {}, money(sum) + (unknown ? " + أصناف جديدة" : "")));
+    [...tbl.querySelectorAll("tr")].slice(1).forEach((tr, i) => { const c = tr.children[tr.children.length - 2]; if (c && draft[i] && !draft[i].isNew) c.textContent = money(lineTotal(draft[i])); });
+  };
+  addInput.addEventListener("change", () => {
+    const v = addInput.value.trim(); if (!v) return;
+    const it = STOCK_ITEMS.find((i) => `${i.id} — ${i.name}` === v) || STOCK_ITEMS.find((i) => i.id.toLowerCase() === v.toLowerCase());
+    if (!it) return flash("الصنف مش موجود", false);
+    if (draft.some((l) => l.row === it.row)) { addInput.value = ""; return flash("الصنف موجود بالفعل في الفاتورة", false); }
+    draft.push({ row: it.row, id: it.id, name: it.name, cartons: retail ? 0 : 1, pieces: retail ? 1 : 0, cp: null, pp: null, isNew: true });
+    addInput.value = ""; draw();
+  });
+
+  const close = () => ov.remove();
+  const save = h("button", { class: "btn green", type: "button", disabled: locked, on: { click: async () => {
+    save.disabled = true;
+    const r = await api("adm_editOrder", { number: o.number, note: note.value, lines: draft.map((l) => ({ row: l.row, cartons: l.cartons, pieces: l.pieces })) });
+    save.disabled = false;
+    if (r.code === "STOCK") return flash("المخزون ناقص: " + r.items.map((i) => `${i.name} (المتاح ${i.available})`).join("، "), false);
+    if (!r.ok) return flash(r.message || "تعذّر الحفظ", false);
+    flash("اتحفظ التعديل ✓ والمخزون اتظبط تلقائيًا", true); close(); loadOrders(); if (!$("tab-dash").hidden) loadDash();
+  } } }, "💾 حفظ التعديلات");
+  const cancel = h("button", { class: "btn red", type: "button", disabled: locked, on: { click: async () => {
+    if (!confirm("إلغاء الفاتورة " + o.number + " وإرجاع كل الكميات للمخزون؟")) return;
+    const r = await api("adm_cancelOrder", { number: o.number, note: note.value });
+    if (!r.ok) return flash(r.message || "تعذّر الإلغاء", false);
+    flash("اتلغت الفاتورة والمخزون رجع ✓", true); close(); loadOrders(); if (!$("tab-dash").hidden) loadDash();
+  } } }, "🗑 إلغاء الفاتورة + إرجاع المخزون");
+
+  body.append(
+    h("div", { class: "kv" },
+      h("div", {}, h("small", {}, "العميل"), h("b", {}, o.name || "—"), h("div", { class: "muted", style: "font-size:.75rem" }, "حساب: " + o.user)),
+      h("div", {}, h("small", {}, "الهاتف"), h("b", { class: "ltr" }, o.phone || "—")),
+      h("div", {}, h("small", {}, "الموقع / النوع"), h("b", {}, siteLabel(o.site) + (o.mode === "TEST" ? " — تجريبي" : ""))),
+      h("div", {}, h("small", {}, "الوقت"), h("b", { class: "ltr" }, fmt(o.time))),
+      h("div", {}, h("small", {}, "الحالة"), statusPill(o.status))),
+    o.editedBy ? h("div", { class: "badge-edit" }, `آخر تعديل بواسطة ${o.editedBy} — ${fmt(o.editedAt)}${o.originalTotal ? " — الإجمالي الأصلي " + money(o.originalTotal) : ""}${o.editNote ? " — " + o.editNote : ""}`) : "",
+    h("div", { class: "scroll", style: "margin-top:10px" }, tbl), dl,
+    locked ? "" : h("div", { class: "add-line" }, addInput),
+    totalBar,
+    locked ? "" : note,
+    locked ? h("p", { class: "hint" }, "الفاتورة ملغية ولا تقبل التعديل.") : h("p", { class: "hint" }, "لو صنف خلص أو مش متوفر: شيله أو قلّل كميته. المخزون بيرجع للقديم ثم يتخصم الجديد تلقائيًا. السطور القديمة بتحتفظ بسعرها وقت الطلب."));
+
+  const ov = h("div", { class: "overlay", on: { click: (e) => e.target === ov && close() } },
+    h("div", { class: "sheet", role: "dialog", "aria-modal": "true" },
+      h("div", { class: "sheet-head" }, h("h3", {}, o.number), h("button", { type: "button", "aria-label": "إغلاق", on: { click: close } }, "✕")),
+      body,
+      h("div", { class: "sheet-foot" }, save, cancel, h("span", { class: "grow" }), h("button", { class: "btn ghost", type: "button", on: { click: close } }, "إغلاق"))));
+  document.body.append(ov);
+  draw();
+}
+
+/* ---------------- العملاء ---------------- */
+$("genPass").addEventListener("click", () => {
+  const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const a = new Uint32Array(8); crypto.getRandomValues(a);
+  $("cPass").value = Array.from(a, (n) => chars[n % chars.length]).join("");
+});
+$("saveCust").addEventListener("click", async () => {
+  const b = $("saveCust"); b.disabled = true;
+  const r = await api("adm_saveCustomer", { username: $("cUser").value, password: $("cPass").value, site: $("cSite").value, note: $("cNote").value, active: $("cActive").checked });
+  b.disabled = false;
+  if (!r.ok) return flash(r.message || "تعذّر الحفظ", false);
+  flash(r.created ? "تم إنشاء العميل ✓ — انسخ الباسورد وابعته له" : "تم التحديث ✓", true);
+  if (r.created && $("cPass").value) { try { navigator.clipboard.writeText(`${$("cUser").value} / ${$("cPass").value}`); } catch (e) {} }
+  $("cPass").value = ""; loadCustomers();
+});
+let CUSTOMERS = [];
+async function loadCustomers() { const r = await api("adm_customers"); if (r.ok) { CUSTOMERS = r.customers; drawCustomers(); } }
+function drawCustomers() {
+  const q = $("cQ").value.trim().toLowerCase();
+  const list = CUSTOMERS.filter((c) => !q || `${c.username} ${c.note}`.toLowerCase().includes(q));
+  if (!list.length) return $("custTable").replaceChildren(h("tr", {}, h("td", { class: "empty" }, "لا يوجد عملاء")));
+  $("custTable").replaceChildren(
+    h("tr", {}, ...["العميل", "الموقع", "الحالة", "الجهاز", "آخر دخول", "ملاحظة", ""].map((x) => h("th", {}, x))),
+    ...list.map((c) => h("tr", {},
+      h("td", {}, h("b", {}, c.username)),
+      h("td", {}, siteLabel(c.site)),
+      h("td", {}, h("span", { class: "pill " + (c.active ? "ok" : "no") }, c.active ? "مفعّل" : "متوقف")),
+      h("td", {}, h("span", { class: "pill " + (c.hasDevice ? "info" : "warn") }, c.hasDevice ? "مربوط بجهاز" : "لسه ما دخلش")),
+      h("td", {}, c.last_login ? h("span", { class: "ltr" }, fmt(c.last_login)) : "—"),
+      h("td", {}, c.note || ""),
+      h("td", {}, h("div", { class: "actions" },
+        h("button", { class: "btn sm", type: "button", on: { click: async () => { switchTab("orders"); $("oMode").value = ""; $("oQ").value = c.username; await loadOrders(c.username); drawOrders(); } } }, "🧾 السجل"),
+        h("button", { class: "btn ghost sm", type: "button", on: { click: () => { $("cUser").value = c.username; $("cSite").value = c.site; $("cNote").value = c.note || ""; $("cActive").checked = c.active; $("cPass").value = ""; scrollTo({ top: 0, behavior: "smooth" }); } } }, "تعديل"),
+        h("button", { class: "btn ghost sm", type: "button", disabled: !c.hasDevice, on: { click: async () => { if (!confirm("فك ربط الجهاز لـ " + c.username + "؟ هيقدر يدخل من جهاز جديد.")) return; const x = await api("adm_resetDevice", { username: c.username }); x.ok ? (flash("تم فك الربط ✓", true), loadCustomers()) : flash(x.message || "فشل", false); } } }, "فك ربط الجهاز"),
+        h("button", { class: "btn sm " + (c.active ? "red" : "green"), type: "button", on: { click: async () => { const x = await api("adm_saveCustomer", { username: c.username, site: c.site, note: c.note || "", active: !c.active, password: "" }); x.ok ? loadCustomers() : flash(x.message || "فشل", false); } } }, c.active ? "إيقاف" : "تفعيل"))))));
+}
+$("cQ").addEventListener("input", drawCustomers);
+
+/* ---------------- المخزون ---------------- */
+async function loadStock() { const r = await api("adm_stock"); if (r.ok) { STOCK_ITEMS = r.items; drawStock(); } }
+function drawStock() {
+  const q = $("stockQ").value.trim().toLowerCase(), lowOnly = $("stockLow").checked;
+  const list = STOCK_ITEMS.filter((i) => (!q || `${i.id} ${i.name}`.toLowerCase().includes(q)) && (!lowOnly || (i.real !== "" && Number(i.real) < 3)));
+  const cell = (it, which) => {
+    const inp = h("input", { type: "number", min: "0", step: "any", value: it[which] === "" || it[which] == null ? "" : it[which] });
+    const b = h("button", { class: "btn green sm", type: "button", on: { click: async () => { b.disabled = true; const x = await api("adm_setStock", { row: it.row, which, value: inp.value }); b.disabled = false; if (x.ok) { it[which] = inp.value; flash("اتحفظ ✓", true); drawStockKeep(); } else flash(x.message || "فشل", false); } } }, "حفظ");
+    return h("td", {}, h("div", { class: "actions" }, inp, b));
+  };
+  $("stockTable").replaceChildren(
+    h("tr", {}, ...["الكود", "الصنف", "المخزون الحقيقي (كراتين)", "تجريبي"].map((x) => h("th", {}, x))),
+    ...list.map((it) => {
+      const n = it.real === "" || it.real == null ? null : Number(it.real);
+      return h("tr", { class: n === null ? "" : n < 1 ? "out" : n < 3 ? "low" : "" }, h("td", {}, h("span", { class: "ltr" }, it.id)), h("td", {}, it.name, it.available ? "" : [" ", h("span", { class: "pill no" }, "غير متوفر")]), cell(it, "real"), cell(it, "test"));
+    }));
+}
+const drawStockKeep = () => {};
+["stockQ", "stockLow"].forEach((id) => $(id).addEventListener("input", drawStock));
+
+/* ---------------- التجربة ---------------- */
+$("resetTest").addEventListener("click", async () => {
+  if (!confirm("هيتم استبدال المخزون التجريبي بنسخة جديدة من الحقيقي. متأكد؟")) return;
+  const x = await api("adm_resetTest"); x.ok ? flash("اتعمل ريسيت للمخزون التجريبي ✓", true) : flash(x.message || "فشل", false);
+});
+
+show(!!sessionStorage.getItem(TOKEN_KEY));
+</script>
+</body>
+</html>
