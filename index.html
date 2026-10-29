@@ -303,17 +303,32 @@
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
 
-  <!-- ===== شاشة تسجيل الدخول (الموقع كله مقفول لحد ما العميل يسجّل) ===== -->
-  <div class="login-gate" id="loginGate" hidden role="dialog" aria-modal="true" aria-label="تسجيل الدخول">
-    <form class="login-card" id="loginForm" autocomplete="on">
+  <!-- ===== شاشة الدخول: القطاعي مفتوح (اسم + موبايل مرة واحدة بس، بدون باسورد) ===== -->
+  <div class="login-gate" id="loginGate" hidden role="dialog" aria-modal="true" aria-label="الدخول للمتجر">
+    <form class="login-card" id="visitorForm" autocomplete="on">
       <img class="login-logo" src="logo.svg" alt="" width="64" height="64">
       <h1 class="login-title">AL-IRAQI <small>HOME APPLIANCES</small></h1>
-      <p class="login-sub">سجّل دخولك بالاسم والباسورد اللي اتسلّموا لك</p>
+      <p class="login-sub">أهلًا بيك! اكتب اسمك ورقم موبايلك مرة واحدة بس وتتصفّح الأسعار — من غير باسورد</p>
+      <input type="text" id="visitorName" name="name" placeholder="اسمك أو اسم المحل" autocomplete="name" maxlength="60" required aria-label="الاسم">
+      <input type="tel" id="visitorPhone" name="tel" placeholder="رقم الموبايل (واتساب) — 01012345678" autocomplete="tel" inputmode="tel" maxlength="20" required aria-label="رقم الموبايل">
+      <p class="login-error" id="visitorError" hidden role="alert"></p>
+      <button type="submit" class="btn-login" id="visitorBtn">دخول للمتجر</button>
+      <p class="login-note">بياناتك بتتحفظ على جهازك — مش هتكتبها تاني.</p>
+      <div class="login-wa">
+        <p class="login-wa-q">عندك استفسار أو محتاج مساعدة؟ كلّمنا على واتساب</p>
+        <a class="btn-wa js-new-wa" href="#" target="_blank" rel="noopener">💬 تواصل معنا على واتساب</a>
+      </div>
+      <button type="button" class="link-btn" id="showAdminLogin">دخول الإدارة</button>
+    </form>
+    <form class="login-card" id="loginForm" autocomplete="on" hidden>
+      <img class="login-logo" src="logo.svg" alt="" width="64" height="64">
+      <h1 class="login-title">AL-IRAQI <small>HOME APPLIANCES</small></h1>
+      <p class="login-sub">دخول الإدارة (وضع التجربة)</p>
       <input type="text" id="loginUser" name="username" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-label="اسم المستخدم">
       <input type="password" id="loginPass" name="password" placeholder="الباسورد" autocomplete="current-password" required aria-label="الباسورد">
       <p class="login-error" id="loginError" hidden role="alert"></p>
       <button type="submit" class="btn-login" id="loginBtn">دخول</button>
-      <p class="login-note">الحساب بيشتغل على جهاز واحد فقط. لو غيّرت جهازك كلّمنا على واتساب.</p>
+      <button type="button" class="link-btn" id="backToVisitor">← رجوع</button>
     </form>
   </div>
 

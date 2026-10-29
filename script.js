@@ -28,10 +28,14 @@ const CONFIG = {
   retailMarkupPercent: 15,
 
   // ---- الدخول بباسورد + ربط الجهاز + المخزون (الـ Backend على Google Apps Script) ----
-  apiUrl: "https://script.google.com/macros/s/AKfycbyJWqKR0B2IPzHrd2UMrCWDkx8hPuNCXuHvbfh9RePL7oMQUO80r5wC2Kx8nPe4BTRJ/exec",                 // ⚠️ حط هنا رابط الـ Web App بعد ما تنشره (انظر backend/Code.gs)
+  apiUrl: "https://script.google.com/macros/s/AKfycbz4V2kjQsTgck4IR0uK5kOI6LxabC1esDXeF0XCKpYQYUouIkHTnGigX8UCPKLsQ34o/exec",                 // ⚠️ حط هنا رابط الـ Web App بعد ما تنشره (انظر backend/Code.gs)
   requireLogin: true,         // false = الموقع مفتوح (لازم PUBLIC_SITES في Code.gs تتضبط كمان)
   tokenKey: `aliraqi_session_v1_${MODE}`,
   deviceKey: "aliraqi_device_id_v1",
+  savedKey: `aliraqi_saved_v1_${MODE}`, // بيانات الدخول المحفوظة على الجهاز (عشان العميل ميكتبهاش كل مرة)
+  newCustomerMessage: IS_RETAIL
+    ? "السلام عليكم، عندي استفسار بخصوص منتجات العراقي للأدوات المنزلية"
+    : "السلام عليكم، أنا عميل جديد وعايز أفتح حساب جملة في العراقي للأدوات المنزلية",
 
   // ---- سرعة الصور: نسخة صغيرة بتظهر فورًا (مموّهة) وبعدها الدقة العالية تحل مكانها ----
   // التصغير شغال تلقائيًا لصور Google Drive و googleusercontent. أي مصدر تاني بيتحمّل بحجمه الأصلي.
@@ -860,15 +864,119 @@ async function apiCall(action, payload) {
   }
 }
 
-function showLoginGate(msg) {
+/* ---- بيانات الدخول المحفوظة على الجهاز: {kind:"visitor", name, phone} أو {kind:"account", u, p} ---- */
+function getSaved() {
+  try {
+    return JSON.parse(localStorage.getItem(CONFIG.savedKey) || "null");
+  } catch (e) {
+    return null;
+  }
+}
+function setSaved(obj) {
+  try {
+    if (obj) localStorage.setItem(CONFIG.savedKey, JSON.stringify(obj));
+    else localStorage.removeItem(CONFIG.savedKey);
+  } catch (e) {
+    /* تجاهل */
+  }
+}
+let AUTO_RELOGIN_TRIED = false;
+/** دخول تلقائي بالبيانات المحفوظة. يرجّع true لو نجح، أو كود الخطأ لو فشل، أو false لو مفيش بيانات */
+async function autoLogin() {
+  const sv = getSaved();
+  const dev = getDeviceId();
+  if (!sv || !dev) return false;
+  let res;
+  if (sv.kind === "visitor" && IS_RETAIL) res = await apiCall("visitorLogin", { name: sv.name, phone: sv.phone, deviceId: dev, token: "" });
+  else if (sv.kind === "account") res = await apiCall("login", { username: sv.u, password: sv.p, deviceId: dev, token: "" });
+  else return false;
+  if (!res.ok) {
+    if (res.code === "AUTH" || res.code === "DEVICE" || res.code === "INACTIVE" || res.code === "NO_PASSWORD") {
+      if (res.code === "AUTH") setSaved(null); // الباسورد اتغيّر
+    }
+    return res.code || "SERVER";
+  }
+  setSession({ token: res.token, name: res.name, role: res.role, phone: res.phone || "" });
+  prefillCustomerFromSession();
+  return true;
+}
+/** يملّي اسم/رقم العميل في الفاتورة من بيانات الزائر (لو فاضيين) */
+function prefillCustomerFromSession() {
+  const s = getSession();
+  if (!s || s.role !== "visitor") return;
+  if (el.customerName && !el.customerName.value) el.customerName.value = s.name || "";
+  if (el.customerPhone && !el.customerPhone.value) el.customerPhone.value = s.phone || "";
+}
+
+/* ---- تتبّع نشاط زوار القطاعي (دُفعات خفيفة) ---- */
+let TRACK_Q = [];
+let trackTimer = null;
+let LAST_TRACK = "";
+let LAST_OPEN_TS = 0;
+function track(type, detail) {
+  const s = getSession();
+  if (!CONFIG.apiUrl || !s || s.role !== "visitor") return;
+  const d = String(detail || "").slice(0, 200);
+  const sig = type + "|" + d;
+  if (type !== "open" && sig === LAST_TRACK) return;
+  LAST_TRACK = sig;
+  if (type === "open") LAST_OPEN_TS = Date.now();
+  TRACK_Q.push({ t: type, d, ts: Date.now() });
+  if (TRACK_Q.length >= 20) return flushTrack();
+  clearTimeout(trackTimer);
+  trackTimer = setTimeout(flushTrack, 5000);
+}
+function flushTrack(unloading) {
+  clearTimeout(trackTimer);
+  const s = getSession();
+  if (!TRACK_Q.length || !s) return;
+  const events = TRACK_Q.splice(0, 40);
+  const body = JSON.stringify({ action: "track", site: MODE, token: s.token, deviceId: getDeviceId(), events });
+  try {
+    fetch(CONFIG.apiUrl, { method: "POST", body, keepalive: unloading === true && body.length < 60000 }).catch(() => {});
+  } catch (e) {
+    /* تجاهل */
+  }
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") flushTrack(true);
+  else if (Date.now() - LAST_OPEN_TS > 30 * 60000) track("open", "رجع للموقع");
+});
+window.addEventListener("pagehide", () => flushTrack(true));
+
+function setupNewCustomerButtons() {
+  const link = `https://wa.me/${CONFIG.whatsappNumber.trim()}?text=${encodeURIComponent(CONFIG.newCustomerMessage)}`;
+  document.querySelectorAll(".js-new-wa").forEach((a) => {
+    a.href = link;
+  });
+}
+
+function showLoginGate(msg, form) {
   const gate = $id("loginGate");
   if (!gate) return;
   gate.hidden = false;
   document.body.classList.add("modal-open");
-  const err = $id("loginError");
+  // القطاعي: الافتراضي نموذج الزائر (اسم + موبايل). الجملة: نموذج الحساب (اسم + باسورد)
+  const useVisitor = IS_RETAIL && !!$id("visitorForm") && form !== "account";
+  if ($id("visitorForm")) $id("visitorForm").hidden = !useVisitor;
+  $id("loginForm").hidden = useVisitor;
+  const err = useVisitor ? $id("visitorError") : $id("loginError");
   err.hidden = !msg;
   err.textContent = msg || "";
-  setTimeout(() => $id("loginUser").focus(), 50);
+  const sv = getSaved();
+  if (useVisitor) {
+    if (sv && sv.kind === "visitor") {
+      if (!$id("visitorName").value) $id("visitorName").value = sv.name || "";
+      if (!$id("visitorPhone").value) $id("visitorPhone").value = sv.phone || "";
+    }
+    setTimeout(() => $id(($id("visitorName").value ? "visitorPhone" : "visitorName")).focus(), 50);
+  } else {
+    if (sv && sv.kind === "account") {
+      if (!$id("loginUser").value) $id("loginUser").value = sv.u || "";
+      if (!$id("loginPass").value) $id("loginPass").value = sv.p || "";
+    }
+    setTimeout(() => $id("loginUser").focus(), 50);
+  }
 }
 function hideLoginGate() {
   const gate = $id("loginGate");
@@ -883,13 +991,28 @@ function updateLogoutButton() {
   const b = $id("logoutBtn");
   if (b) b.hidden = !(CONFIG.apiUrl && getSession());
 }
-function handleAuthFailure(code) {
+async function handleAuthFailure(code) {
   setSession(null);
   updateLogoutButton();
-  showLoginGate(AUTH_MESSAGES[code] || AUTH_MESSAGES.TOKEN);
+  // انتهاء الجلسة: نحاول ندخل تلقائيًا بالبيانات المحفوظة قبل ما نطلب من العميل يكتب حاجة
+  if (code === "TOKEN" && !AUTO_RELOGIN_TRIED) {
+    AUTO_RELOGIN_TRIED = true;
+    const r = await autoLogin();
+    if (r === true) {
+      updateLogoutButton();
+      hideLoginGate();
+      loadProductsFromApi(false);
+      return;
+    }
+  }
+  const sv = getSaved();
+  showLoginGate(AUTH_MESSAGES[code] || AUTH_MESSAGES.TOKEN, sv && sv.kind === "account" ? "account" : undefined);
 }
 function logout() {
+  track("logout", "");
+  flushTrack(true);
   setSession(null);
+  setSaved(null); // خروج صريح = نمسح البيانات المحفوظة
   location.reload();
 }
 
@@ -915,17 +1038,69 @@ async function submitLogin(e) {
   $id("loginPass").value = "";
   err.hidden = true;
   setSession({ token: res.token, name: res.name, role: res.role });
+  setSaved({ kind: "account", u: user, p: pass }); // نفتكره على الجهاز
+  AUTO_RELOGIN_TRIED = false;
   updateLogoutButton();
   hideLoginGate();
   loadProductsFromApi(false);
 }
 
-function bootWithApi() {
+/** القطاعي: الزائر بيكتب اسمه وموبايله مرة واحدة بس (بدون باسورد) وبعدها بيدخل تلقائي */
+async function submitVisitor(e) {
+  e.preventDefault();
+  const name = $id("visitorName").value.replace(/\s+/g, " ").trim();
+  const ph = normalizeEgyptPhone($id("visitorPhone").value);
+  const err = $id("visitorError");
+  const btn = $id("visitorBtn");
+  const fail = (m) => {
+    err.hidden = false;
+    err.textContent = m;
+  };
+  if (name.length < 2) return fail("اكتب اسمك أو اسم المحل");
+  if (!ph.valid) return fail("رقم الموبايل غير صحيح — مثال: 01012345678");
+  const dev = getDeviceId();
+  if (!dev) return fail(AUTH_MESSAGES.DEVICE_ID);
+  const local = "0" + ph.e164.slice(2);
+  btn.disabled = true;
+  btn.textContent = "لحظة…";
+  const res = await apiCall("visitorLogin", { name, phone: local, deviceId: dev, token: "" });
+  btn.disabled = false;
+  btn.textContent = "دخول للمتجر";
+  if (!res.ok) return fail(res.message || AUTH_MESSAGES[res.code] || AUTH_MESSAGES.SERVER);
+  err.hidden = true;
+  setSession({ token: res.token, name: res.name, role: "visitor", phone: res.phone });
+  setSaved({ kind: "visitor", name: res.name, phone: res.phone });
+  AUTO_RELOGIN_TRIED = false;
+  prefillCustomerFromSession();
   updateLogoutButton();
+  hideLoginGate();
+  loadProductsFromApi(false);
+}
+
+async function bootWithApi() {
+  updateLogoutButton();
+  setupNewCustomerButtons();
   if (CONFIG.requireLogin && !getSession()) {
+    // عنده بيانات محفوظة؟ ندخّله تلقائي من غير ما يشوف شاشة الدخول
+    if (getSaved()) {
+      setViewState("loading");
+      const r = await autoLogin();
+      if (r === true) {
+        updateLogoutButton();
+        hideLoginGate();
+        track("open", "فتح الموقع");
+        loadProductsFromApi(false);
+        return;
+      }
+      const sv = getSaved();
+      showLoginGate(r && r !== true && r !== "NETWORK" ? AUTH_MESSAGES[r] || "" : r === "NETWORK" ? AUTH_MESSAGES.NETWORK : "", sv && sv.kind === "account" ? "account" : undefined);
+      return;
+    }
     showLoginGate("");
     return;
   }
+  prefillCustomerFromSession();
+  track("open", "فتح الموقع");
   loadProductsFromApi(false);
 }
 
@@ -1189,6 +1364,9 @@ if ($id("historyClose")) $id("historyClose").addEventListener("click", closeHist
 if ($id("historyOverlay")) $id("historyOverlay").addEventListener("click", closeHistory);
 
 if ($id("loginForm")) $id("loginForm").addEventListener("submit", submitLogin);
+if ($id("visitorForm")) $id("visitorForm").addEventListener("submit", submitVisitor);
+if ($id("showAdminLogin")) $id("showAdminLogin").addEventListener("click", () => showLoginGate("", "account"));
+if ($id("backToVisitor")) $id("backToVisitor").addEventListener("click", () => showLoginGate(""));
 if ($id("logoutBtn")) $id("logoutBtn").addEventListener("click", logout);
 
 function processProducts(rawList) {
@@ -1264,6 +1442,7 @@ function buildCategoryChips() {
 }
 
 function selectCategory(cat) {
+  if (cat !== ACTIVE_CATEGORY && cat !== "الكل") track("category", cat);
   ACTIVE_CATEGORY = cat;
   let activeChip = null;
   [...el.categoryChips.children].forEach((c) => {
@@ -1874,6 +2053,7 @@ function addToCart(product, qty, unit) {
     showToast(`المتاح من "${product.name}" ${cap} ${unitLabel(unit)} فقط`, "error", 3600);
   }
   CART[key] = { productKey: product._key, id: product.id, unit, qty: newQty };
+  track("add", `${product.name} (${product.id}) × ${qty} ${unitLabel(unit)}`);
   renderCart();
   saveCartToStorage();
 
@@ -2464,6 +2644,7 @@ function openInvoice() {
   if (!order.lines.length || order.hasInvalid) return;
   const meta = ensureOrderMeta(order);
   INVOICE_STATE = { order, meta };
+  track("invoice", `فتح الفاتورة — ${order.lines.length} صنف — ${order.totals.grand} ج.م`);
   renderInvoice(order, meta, getCustomerInfo());
   updateWhatsappReadyState();
   invoiceTrigger = document.activeElement;
@@ -2911,6 +3092,7 @@ function openWhatsappChat() {
   if (!isPdfReady()) return;
   const caption = buildInvoiceCaption(INVOICE_STATE.order, INVOICE_STATE.meta, getCustomerInfo());
   const link = `https://wa.me/${CONFIG.whatsappNumber.trim()}?text=${encodeURIComponent(caption)}`;
+  track("whatsapp", `إرسال الطلب ${INVOICE_STATE.meta.number || ""}`);
   window.open(link, "_blank", "noopener");
   showToast("في واتساب: اضغط 📎 واختار «مستند» وارفق آخر ملف اتحمّل", "hint", 6000);
 }
@@ -2953,6 +3135,7 @@ function goToLightboxImage(newIndex) {
 }
 
 function openLightbox(images, startIndex, caption, triggerEl) {
+  if (caption) track("view", caption);
   lightboxTrigger = triggerEl || document.activeElement;
   LIGHTBOX_IMAGES = images && images.length ? images : [FALLBACK_IMAGE];
   LIGHTBOX_INDEX = typeof startIndex === "number" ? startIndex : 0;
@@ -3062,7 +3245,8 @@ el.searchInput.addEventListener("input", (e) => {
   searchDebounceTimer = setTimeout(() => {
     SEARCH_TERM = value;
     renderGrid();
-  }, 200);
+    if (value.trim().length >= 2) track("search", value.trim());
+  }, 600);
 });
 
 el.resetFilters.addEventListener("click", () => {
