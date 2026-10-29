@@ -44,7 +44,11 @@ const CONFIG = {
   cardWidth: 1100,       // الدقة العالية في الكارت
   lightboxWidth: 1800,   // الدقة في التكبير
   cartThumbWidth: 160,   // صور السلة
-  lazyMargin: "2000px 0px", // بنبدأ تحميل الصور قبل ما توصلها بـ ~2000px
+  lazyMargin: "700px 0px", // بنبدأ تحميل الصور قبل ما توصلها بـ ~700px
+  maxParallelImages: 4,    // أقصى عدد صور بتتحمّل في نفس اللحظة (تحميل الكل مرة واحدة بيخلي مواقع الصور ترفض وتطلع «service unavailable»)
+  imageRetries: 2,         // لو الصورة فشلت نحاول تاني قبل ما نيأس
+  // وسيط صور مجاني بيخزّن الصور ويصغّرها (بيحمي استضافة الصور من الضغط). فاضي "" = بدون وسيط. لو الوسيط فشل بنرجع للرابط الأصلي تلقائي.
+  imageProxy: "https://wsrv.nl/",
 
   maxQuantity: 9999,
   cartStorageKey: `aliraqi_cart_v2_${MODE}`,
@@ -280,22 +284,52 @@ function imgUrl(src, w) {
   if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
   const g = /^(https:\/\/lh\d\.googleusercontent\.com\/[^=\s]+)(=[^/\s]*)?$/.exec(src);
   if (g) return `${g[1]}=w${w}`;
+  // أي مصدر تاني (imgbb وغيره): عن طريق الوسيط. عرض واحد للكارت والمصغّرة عشان طلب واحد بس للصورة
+  if (CONFIG.imageProxy && /^https?:\/\//i.test(src) && !src.startsWith(CONFIG.imageProxy)) {
+    const pw = w > 1100 ? 1600 : w <= 200 ? 200 : 700;
+    return `${CONFIG.imageProxy}?url=${encodeURIComponent(src)}&w=${pw}&we=1&output=webp&q=80`;
+  }
   return src;
 }
 
 const IMG_LOADS = new Map();
-function preloadImage(url) {
+let IMG_ACTIVE = 0;
+const IMG_QUEUE = []; // صور الشاشة (أولوية)
+const IMG_QUEUE_LOW = []; // تحميل مسبق للصور المجاورة (بعد ما الأولوية تخلص)
+function pumpImages() {
+  while (IMG_ACTIVE < CONFIG.maxParallelImages && (IMG_QUEUE.length || IMG_QUEUE_LOW.length)) {
+    const job = IMG_QUEUE.length ? IMG_QUEUE.shift() : IMG_QUEUE_LOW.shift();
+    IMG_ACTIVE++;
+    job();
+  }
+}
+function loadImageOnce(url) {
+  return new Promise((resolve) => {
+    const i = new Image();
+    i.decoding = "async";
+    i.onload = () => resolve(true);
+    i.onerror = () => resolve(false);
+    i.src = url;
+  });
+}
+/** تحميل صورة بطابور (أقصى CONFIG.maxParallelImages في نفس الوقت) + إعادة محاولة لو فشلت */
+function preloadImage(url, low) {
   if (!url) return Promise.resolve(null);
   if (IMG_LOADS.has(url)) return IMG_LOADS.get(url);
   const p = new Promise((resolve) => {
-    const i = new Image();
-    i.decoding = "async";
-    i.onload = () => resolve(url);
-    i.onerror = () => {
-      IMG_LOADS.delete(url);
-      resolve(null);
+    const job = async () => {
+      let ok = false;
+      for (let a = 0; a <= CONFIG.imageRetries && !ok; a++) {
+        ok = await loadImageOnce(url);
+        if (!ok && a < CONFIG.imageRetries) await new Promise((r) => setTimeout(r, 700 * (a + 1)));
+      }
+      IMG_ACTIVE--;
+      if (!ok) IMG_LOADS.delete(url);
+      resolve(ok ? url : null);
+      pumpImages();
     };
-    i.src = url;
+    (low ? IMG_QUEUE_LOW : IMG_QUEUE).push(job);
+    pumpImages();
   });
   IMG_LOADS.set(url, p);
   return p;
@@ -368,7 +402,7 @@ function preloadNeighbours(list, index, w) {
   whenIdle(() => {
     [1, -1].forEach((d) => {
       const s = list[(index + d + list.length) % list.length];
-      if (s && s !== FALLBACK_IMAGE) preloadImage(imgUrl(s, w));
+      if (s && s !== FALLBACK_IMAGE) preloadImage(imgUrl(s, w), true);
     });
   });
 }
