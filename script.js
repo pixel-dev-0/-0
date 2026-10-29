@@ -28,7 +28,7 @@ const CONFIG = {
   retailMarkupPercent: 15,
 
   // ---- الدخول بباسورد + ربط الجهاز + المخزون (الـ Backend على Google Apps Script) ----
-  apiUrl: "",                 // ⚠️ حط هنا رابط الـ Web App بعد ما تنشره (انظر backend/Code.gs)
+  apiUrl: "https://script.google.com/macros/s/AKfycbyJWqKR0B2IPzHrd2UMrCWDkx8hPuNCXuHvbfh9RePL7oMQUO80r5wC2Kx8nPe4BTRJ/exec",                 // ⚠️ حط هنا رابط الـ Web App بعد ما تنشره (انظر backend/Code.gs)
   requireLogin: true,         // false = الموقع مفتوح (لازم PUBLIC_SITES في Code.gs تتضبط كمان)
   tokenKey: `aliraqi_session_v1_${MODE}`,
   deviceKey: "aliraqi_device_id_v1",
