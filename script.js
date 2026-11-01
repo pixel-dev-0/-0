@@ -49,7 +49,7 @@ const CONFIG = {
   imageRetries: 2,         // لو الصورة فشلت نحاول تاني قبل ما نيأس
   // وسيط صور مجاني بيخزّن الصور ويصغّرها (بيحمي استضافة الصور من الضغط). فاضي "" = بدون وسيط. لو الوسيط فشل بنرجع للرابط الأصلي تلقائي.
   imageProxy: "https://wsrv.nl/",
-  imageWorker: "", // رابط الـ Worker بتاع Cloudflare (cloudflare/image-worker.js) — لو اتحط بيستخدمه بدل wsrv مباشرة
+  imageWorker: "https://muddy-butterfly-aadf.alshfykrym044.workers.dev", // رابط الـ Worker بتاع Cloudflare (cloudflare/image-worker.js) — لو اتحط بيستخدمه بدل wsrv مباشرة
 
   maxQuantity: 9999,
   cartStorageKey: `aliraqi_cart_v2_${MODE}`,
